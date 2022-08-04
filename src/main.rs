@@ -35,10 +35,7 @@ fn get_url(url: &str, fuzz_word: &str) -> (Url, String) {
     
     match Url::parse(&new_url) {
         Ok(u) => return (u, new_url),
-        Err(_e) => {
-            panic!("Error while building URL: {}", new_url)
-            // TODO: std::process::exit(1);
-        }
+        Err(_e) => panic!("Error while building URL: {}", new_url)
     };
 }
 
