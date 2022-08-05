@@ -1,6 +1,6 @@
 # rustfuzz
 
-![image](https://user-images.githubusercontent.com/35298550/183158681-16109aa0-ff8b-4719-af4f-644300130cce.png)
+![image](https://user-images.githubusercontent.com/35298550/183158896-b0d2ed50-441e-4514-904c-446dd84cc251.png)
 
 basic web fuzzer
 
