@@ -1,5 +1,7 @@
 # rustfuzz
 
+![image](https://user-images.githubusercontent.com/35298550/183158681-16109aa0-ff8b-4719-af4f-644300130cce.png)
+
 basic web fuzzer
 
 ## building
