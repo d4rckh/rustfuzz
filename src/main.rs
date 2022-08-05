@@ -1,5 +1,6 @@
 mod logging;
 
+use chrono::prelude::*;
 use clap::Parser;
 
 use reqwest::Url;
@@ -9,12 +10,14 @@ use std::error::Error;
 
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
+use std::fs::OpenOptions;
 
 pub struct FuzzResult {
     fuzz_word: String,
     url: String,
     status_code: reqwest::StatusCode,
-    body_length: usize
+    body_length: usize,
+    time: DateTime<Local>
 }
 
 #[derive(Parser, Debug)]
@@ -27,7 +30,10 @@ pub struct Args {
     wordlist: String,
 
     #[clap(short='s', long="status-code", help="Specify a status code to show (flag can be used multiple times)")]
-    status_codes: Vec<String>
+    status_codes: Vec<String>,
+
+    #[clap(default_value="", short='o', long="output", help="Specify the file in which the results will be saved")]
+    file_save: String
 }
 
 fn get_url(url: &str, fuzz_word: &str) -> (Url, String) {
@@ -38,6 +44,8 @@ fn get_url(url: &str, fuzz_word: &str) -> (Url, String) {
         Err(_e) => panic!("Error while building URL: {}", new_url)
     };
 }
+
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -56,6 +64,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let file = File::open(&args.wordlist)?;
     let reader = BufReader::new(file);
     
+    let mut file_save: Option<File> = None;
+
+    if args.file_save != "" {
+        file_save = Some(OpenOptions::new()
+            .append(true)
+            .open(&args.file_save)
+            .expect("Unable to open file for saving results"));
+    }
+
     for line in reader.lines() {
         let fuzz_word = line?;
         let (url, url_string) = get_url(&args.url, &fuzz_word);
@@ -71,9 +88,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
             url: url_string.clone(),
             status_code: status,
             body_length: body.len(),
+            time: Local::now()
         };
 
-        logging::print_fuzz_result(&args, &fuzz_result);
+        if logging::print_fuzz_result(&args, &fuzz_result) {
+            if let Some(file) = &mut file_save {
+                fuzz_result.save(file)
+            }
+        }
     }
 
     Ok(())
