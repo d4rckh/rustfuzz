@@ -5,7 +5,7 @@ use std::fs::{File, OpenOptions};
 use std::io::{prelude::*, BufReader};
 
 use chrono::{prelude::*, Duration};
-use reqwest::{Url};
+use reqwest::Url;
 use clap::Parser;
 
 mod logging;
