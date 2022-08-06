@@ -63,7 +63,7 @@ pub fn print_fuzz_result(prog_args: &ProgramArgs, fuzz_result: &FuzzResult) -> b
 
     if ( !prog_args.status_codes.contains(&status_string) && 
         prog_args.status_codes.len() > 0 ) || (prog_args.exclude_status_codes.contains(&status_string)) 
-    { return false }
+    { return false; }
 
     fuzz_result.print();
 
