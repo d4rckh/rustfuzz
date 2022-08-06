@@ -1,5 +1,3 @@
-mod logging;
-
 use core::panic;
 
 use std::error::Error;
@@ -7,8 +5,13 @@ use std::fs::{File, OpenOptions};
 use std::io::{prelude::*, BufReader};
 
 use chrono::{prelude::*, Duration};
+use reqwest::{Url};
 use clap::Parser;
-use reqwest::{Url, Method};
+
+mod logging;
+mod args;
+
+use args::ProgramArgs;
 
 pub struct FuzzResult {
     fuzz_word: String,
@@ -19,34 +22,18 @@ pub struct FuzzResult {
     request_duration: Duration
 }
 
-#[derive(Parser, Debug)]
-#[clap(author="d4rckh", version="v1.0", about="a fuzzer written in rust", long_about = None)]
-pub struct Args {
-    #[clap(short='u', long="url", help="URL to be fuzzed contaning the string 'FUZZ'")]
-    url: String,
-
-    #[clap(short='w', long="wordlist", help="Path to file from which fuzz words will be read")]
-    wordlist: String,
-
-    #[clap(short='s', long="status-code", help="Specify a status code to show (flag can be used multiple times)")]
-    status_codes: Vec<String>,
-
-    #[clap(default_value="", short='o', long="output", help="Specify the file in which the results will be saved")]
-    file_save: String
-}
-
 fn get_url(url: &str, fuzz_word: &str) -> (Url, String) {
     let new_url = url.replace("FUZZ", fuzz_word);
     
     match Url::parse(&new_url) {
         Ok(u) => return (u, new_url),
-        Err(_e) => panic!("Error while building URL: {}", new_url)
+        Err(_e) => panic!("Error while building URL ({new_url}) with word {fuzz_word}")
     };
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let args = Args::parse();
+    let args = ProgramArgs::parse();
     
     if !args.url.contains("FUZZ") {
         println!("The URL provided does not contain a fuzzable area.");
@@ -73,14 +60,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let fuzz_word = line?;
         let (url, url_string) = get_url(&args.url, &fuzz_word);
 
-        let request = reqwest::Request::new(Method::GET, url);
+        let request_builder = client.get(url);
+        let request = request_builder.build()?;
         
         let time_before_res = Local::now();
         let response = client.execute(request).await?;
         let time_after_res = Local::now();
 
         let duration = time_after_res - time_before_res;
-
         let status = response.status();
         let body = response.text().await?;
         

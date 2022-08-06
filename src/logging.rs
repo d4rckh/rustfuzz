@@ -3,7 +3,7 @@ use chrono::{prelude::*, Duration};
 
 use colored::*;
 
-use crate::{FuzzResult, Args};
+use crate::{FuzzResult, ProgramArgs};
 
 pub fn format_datetime(dt: DateTime<Local>, long: bool) -> String { 
     if long {
@@ -58,7 +58,7 @@ impl FuzzResult {
 }
 
 
-pub fn print_fuzz_result(prog_args: &Args, fuzz_result: &FuzzResult) -> bool {
+pub fn print_fuzz_result(prog_args: &ProgramArgs, fuzz_result: &FuzzResult) -> bool {
     let status_string = String::from(fuzz_result.status_code.as_str());
 
     if !prog_args.status_codes.contains(&status_string) && prog_args.status_codes.len() > 0 
@@ -69,7 +69,7 @@ pub fn print_fuzz_result(prog_args: &Args, fuzz_result: &FuzzResult) -> bool {
     true
 }
 
-pub fn print_args(prog_args: &Args) {
+pub fn print_args(prog_args: &ProgramArgs) {
     print!("rustfuzz: fuzzing {} using {}, ", 
         prog_args.url.blue(), 
         prog_args.wordlist.blue());
