@@ -5,7 +5,7 @@ use clap::Parser;
     author="d4rckh", 
     version="v1.0", 
     about="a fuzzer written in rust", 
-    long_about=None,
+    long_about="if you want to contribute to this project, check out the github repo: https://github.com/d4rckh/rustfuzz",
 )]
 pub struct ProgramArgs {
     #[clap(
