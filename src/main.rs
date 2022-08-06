@@ -35,7 +35,7 @@ fn get_url(url: &str, fuzz_word: &str) -> (Url, String) {
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = ProgramArgs::parse();
     
-    if !args.url.contains("FUZZ") {
+    if !args.url.doescontains("FUZZ") {
         println!("The URL provided does not contain a fuzzable area.");
         std::process::exit(1);
     }
