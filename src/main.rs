@@ -57,6 +57,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     for line in reader.lines() {
+
         let fuzz_word = line?;
         let (url, url_string) = get_url(&args.url, &fuzz_word);
 
@@ -79,13 +80,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             time: Local::now(),
             request_duration: duration,
         };
-
         if logging::print_fuzz_result(&args, &fuzz_result) {
-            if let Some(file) = &mut file_save {
+            if let Some(file) = file_save.as_mut() {
                 fuzz_result.save(file)
             }
         }
+
     }
+
+
 
     Ok(())
 }
