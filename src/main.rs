@@ -1,23 +1,22 @@
 mod logging;
 
-use chrono::prelude::*;
-use clap::Parser;
-
-use reqwest::Url;
-use reqwest::Method;
 use core::panic;
-use std::error::Error;
 
-use std::fs::File;
+use std::error::Error;
+use std::fs::{File, OpenOptions};
 use std::io::{prelude::*, BufReader};
-use std::fs::OpenOptions;
+
+use chrono::{prelude::*, Duration};
+use clap::Parser;
+use reqwest::{Url, Method};
 
 pub struct FuzzResult {
     fuzz_word: String,
     url: String,
     status_code: reqwest::StatusCode,
     body_length: usize,
-    time: DateTime<Local>
+    time: DateTime<Local>,
+    request_duration: Duration
 }
 
 #[derive(Parser, Debug)]
@@ -45,8 +44,6 @@ fn get_url(url: &str, fuzz_word: &str) -> (Url, String) {
     };
 }
 
-
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
@@ -57,7 +54,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     logging::print_args(&args);
-
 
     let client = reqwest::Client::new();
     
@@ -78,8 +74,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let (url, url_string) = get_url(&args.url, &fuzz_word);
 
         let request = reqwest::Request::new(Method::GET, url);
-        let response = client.execute(request).await?;
         
+        let time_before_res = Local::now();
+        let response = client.execute(request).await?;
+        let time_after_res = Local::now();
+
+        let duration = time_after_res - time_before_res;
+
         let status = response.status();
         let body = response.text().await?;
         
@@ -88,7 +89,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             url: url_string.clone(),
             status_code: status,
             body_length: body.len(),
-            time: Local::now()
+            time: Local::now(),
+            request_duration: duration,
         };
 
         if logging::print_fuzz_result(&args, &fuzz_result) {

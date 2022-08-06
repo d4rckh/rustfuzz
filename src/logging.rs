@@ -1,5 +1,5 @@
 use std::{fs, io::Write};
-use chrono::prelude::*;
+use chrono::{prelude::*, Duration};
 
 use colored::*;
 
@@ -12,11 +12,22 @@ pub fn format_datetime(dt: DateTime<Local>, long: bool) -> String {
         return dt.format("%H:%M:%S").to_string();    
     }
 }
+
+pub fn format_duration(duration: Duration) -> String {
+    let seconds = duration.num_seconds();
+    let ms = duration.num_milliseconds();
+    if seconds < 2 {
+        return format!("{ms}ms")
+    } else {
+        return format!("{seconds}s")
+    }
+}
+
 impl FuzzResult {
     pub fn print(&self) {
         let status_string = String::from(self.status_code.as_str());
 
-        let mut status_display: ColoredString = status_string.green();
+        let mut status_display: ColoredString = status_string.green(); 
 
         if self.status_code.is_client_error() || 
             self.status_code.is_server_error() {
@@ -26,8 +37,9 @@ impl FuzzResult {
             status_display = status_string.blue()
         }
     
-        println!("({}) code {} size {}: {} ({})",
+        println!("({}) ({}) code {} size {}: {} ({})",
             format_datetime(self.time, false).dimmed(),
+            format_duration(self.request_duration).dimmed(),
             status_display.bold(),
             self.body_length.to_string().cyan(),
             self.url,
