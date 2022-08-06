@@ -61,7 +61,8 @@ impl FuzzResult {
 pub fn print_fuzz_result(prog_args: &ProgramArgs, fuzz_result: &FuzzResult) -> bool {
     let status_string = String::from(fuzz_result.status_code.as_str());
 
-    if !prog_args.status_codes.contains(&status_string) && prog_args.status_codes.len() > 0 
+    if ( !prog_args.status_codes.contains(&status_string) && 
+        prog_args.status_codes.len() > 0 ) || (prog_args.exclude_status_codes.contains(&status_string)) 
     { return false }
 
     fuzz_result.print();
@@ -74,9 +75,14 @@ pub fn print_args(prog_args: &ProgramArgs) {
         prog_args.url.blue(), 
         prog_args.wordlist.blue());
     if prog_args.status_codes.len() > 0 {
-        println!("only displaying requests that return {}.",
+        print!("only displaying requests that return {}",
             prog_args.status_codes.join(", ").blue())
     } else {
-        println!("displaying all requests.")
+        print!("displaying all requests")
     }
+    if prog_args.exclude_status_codes.len() > 0 {
+        print!(", excluding {}",
+            prog_args.exclude_status_codes.join(", ").blue())
+    }
+    println!(".")
 }

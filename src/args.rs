@@ -28,6 +28,13 @@ pub struct ProgramArgs {
         help="Specify a status code to show (flag can be used multiple times)"
     )]
     pub status_codes: Vec<String>,
+    
+    #[clap(
+      short='e', 
+      long="exclude-sc", 
+      help="Specify a status code to exclude (flag can be used multiple times)"
+    )]
+    pub exclude_status_codes: Vec<String>,
 
     #[clap(
         default_value="", 

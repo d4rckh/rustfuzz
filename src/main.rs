@@ -26,9 +26,9 @@ fn get_url(url: &str, fuzz_word: &str) -> (Url, String) {
     let new_url = url.replace("FUZZ", fuzz_word);
     
     match Url::parse(&new_url) {
-        Ok(u) => return (u, new_url),
+        Ok(u) => (u, new_url),
         Err(_e) => panic!("Error while building URL ({new_url}) with word {fuzz_word}")
-    };
+    }
 }
 
 #[tokio::main]
